@@ -3,7 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objs as go
 import pandas as pd
-import csv
+import csv, os
 
 TOTAL_ELECTORAL_VOTES = 538
 
@@ -55,4 +55,4 @@ app.layout = html.Div([
 ])
 
 if __name__ == '__main__':
-    app.run_server()
+    app.run_server(port=os.getenv('PORT', 3000))
