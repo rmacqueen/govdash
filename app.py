@@ -1,51 +1,58 @@
-#My first Dash app, displaying the US States by 'Voting Opportunity'.
-#This will include how many eligible voters didn't vote, and other relevant slices.
-
-# -*- coding: utf-8 -*-
-
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import plotly.graph_objs as go
+import pandas as pd
+import csv
+
+TOTAL_ELECTORAL_VOTES = 538
 
 app = dash.Dash()
 
-app.layout = html.Div(children=[
-    html.Title('''Voting Opportunity'''),
+state_map = {}
+with open('turnouts.csv') as csvfile, open('vote_counts.csv') as f:
+    spamreader = csv.reader(csvfile)
+    for row in spamreader:
+        if len(row[-1]) != 2:
+            continue
+        non_voters = int(row[8].replace(',', '')) - int(row[7].replace(',', ''))
+        state_code = row[-1]
+        state_map[state_code] = non_voters
+    for line in [string.split(',') for string in f.read().split('\n')]:
+        sc = line[0]
+        if len(sc) != 2:
+            continue
+        electoral_votes = int(line[1])
+        margin = abs(int(line[2]) - int(line[3]))
+        state_map[sc] = (state_map[sc] / float(margin)) * (electoral_votes / TOTAL_ELECTORAL_VOTES)
 
-    html.H1(children=[
-        '''Intro'''
-    ]),
-
-    html.P(children=[
-        '''100 million americans did not vote in the 2016 presidential election.
-        The election was decided by a collective 78,000 votes.
-        This elections displays the opportunity for increased voter turnout, by voting district, in the United States.
-        '''
-    ]),
-
+app.layout = html.Div([
+    html.Title("Voting opportunity"),
     dcc.Graph(
-        id='example-graph',
+        id='life-exp-vs-gdp',
         figure={
             'data': [
-                {'x': [1, 2, 3], 'y': [4, 1, 2], 'type': 'bar', 'name': 'Los Angeles'},
-                {'x': [1, 2, 3], 'y': [2, 4, 5], 'type': 'bar', 'name': 'NYC'},
-                {'x': [1, 2, 3], 'y': [2, 2, 8], 'type': 'bar', 'name': 'Austin'},
-                {'x': [1, 2, 3], 'y': [3, 2, 1], 'type': 'bar', 'name': 'Chicago'},
-                {'x': [1, 2, 3], 'y': [4, 2, 4], 'type': 'bar', 'name': 'Detroit'},
+                go.Bar(
+                    x=list(state_map.keys()),
+                    y=list(state_map.values()),
+                )
             ],
-            'layout': {
-                'title': 'Top 5 Voting Opportunity Cities'
-            }
+            'layout': go.Layout(
+                xaxis={'title': 'State'},
+                yaxis={'title': 'Turnout opportunity'},
+                title="Voter turnout opportunity by state for the 2016 presidential election"
+            )
         }
-    )
+    ),
+    html.Div([
+        html.P('''A state's turnout opportunity is calculated by taking the ratio of non-voters to the margin of victory,
+            and then scaling that value by the proportion of total electoral votes granted to that state. It is designed
+            to capture how worthwhile it would be to focus energies to GOTV strategies in that state.'''),
+        html.P("(eligible_non_voters / margin_of_victory) * (state_electoral_votes / 538)"),
+        html.P(["Code and data for this project available ", html.A("here", href='http://github.com/rmacqueen/govdash')])
+    ]),
+
 ])
 
-"""
-@app.server.before_first_request
-def doStuff():
-    global stuff
-    stuff = initialize()
-"""
-
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server()
