@@ -57,7 +57,19 @@ app.layout = html.Div([
         html.P('''A state's turnout opportunity is calculated by taking the ratio of non-voters to the margin of victory,
             and then scaling that value by the proportion of total electoral votes granted to that state. It is designed
             to capture how worthwhile it would be to focus energies to GOTV strategies in that state.'''),
-        html.P("(eligible_non_voters / margin_of_victory) * (state_electoral_votes / 538)"),
+        html.P("turnout_opportunity = (eligible_non_voters / margin_of_victory) * (state_electoral_votes / 538)"),
+        html.P('''The top five 'turnout opportunity' states are perhaps unsurprising: Michigan, Pennsylvania,
+            Florida, Wisconsin, and New Hampshire are among the known 'swing states' in US elections. After that, however,
+            we see some not so obvious candidates for targeted GOTV strategies. Texas comes in at number 6. A very interesting
+            result from the 2016 election that got sort of drowned out amidst the Trump-mania was that Texas saw a rather
+            substantial shift in favor of the Democrats. Although the state still went red, the margin of victory dropped from
+            16% to 9%. Moreover, with a turnout rate of 43.2%, Texas had the second lowest voter participation of all 50 states
+            (only Hawaii is lower). For every 10 eligible voters who did not vote, Democrats needed only convince one of them
+            to show up to vote Democrat, and Texas would have gone blue. Given the sheer size of the state, and the number of
+            people who did not vote, Texas should be under serious consideration as a potential target for voter turnout opportunity in future campaigns. Arizon comes next, and it
+            too exhibited a sizeable shift towards being Democratic in 2016 - it's margin dropped from 9% to 3.5% making it
+            a bona fide swing state. For comparison the margins of victory in both Ohio and North Carolina were larger that
+            Arizona's. '''),
         html.P(["Code and data for this project available ", html.A("here", href='http://github.com/rmacqueen/govdash')])
     ]),
 
