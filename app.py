@@ -38,7 +38,7 @@ with open('voter_opp.csv', 'w') as voter_opp_file:
 app.layout = html.Div([
     html.Title("Voting opportunity"),
     dcc.Graph(
-        id='life-exp-vs-gdp',
+        id='voting-opportunity',
         figure={
             'data': [
                 go.Bar(
