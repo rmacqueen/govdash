@@ -9,7 +9,7 @@ TOTAL_ELECTORAL_VOTES = 538
 
 app = dash.Dash()
 
-state_map = {}
+non_voters_map = {}
 with open('turnouts.csv') as csvfile, open('vote_counts.csv') as f:
     spamreader = csv.reader(csvfile)
     for row in spamreader:
@@ -17,14 +17,23 @@ with open('turnouts.csv') as csvfile, open('vote_counts.csv') as f:
             continue
         non_voters = int(row[8].replace(',', '')) - int(row[7].replace(',', ''))
         state_code = row[-1]
-        state_map[state_code] = non_voters
+        non_voters_map[state_code] = non_voters
+    voter_opp_map = {}
     for line in [string.split(',') for string in f.read().split('\n')]:
         sc = line[0]
         if len(sc) != 2:
             continue
         electoral_votes = int(line[1])
         margin = abs(int(line[2]) - int(line[3]))
-        state_map[sc] = (state_map[sc] / float(margin)) * (electoral_votes / TOTAL_ELECTORAL_VOTES)
+        voter_opp = (non_voters_map[sc] / float(margin)) * (electoral_votes / TOTAL_ELECTORAL_VOTES)
+        voter_opp_map[sc] = voter_opp
+
+with open('voter_opp.csv', 'w') as voter_opp_file:
+    voter_opp_file.write('State, Voter Turnout Opportunity\n')
+    voter_opp_file.write('string, number\n')
+    for k,v in sorted(voter_opp_map.items(), key=lambda x: x[1], reverse=True):
+        voter_opp_file.write(k + "," + ("%.3f" % v) + '\n')
+
 
 app.layout = html.Div([
     html.Title("Voting opportunity"),
@@ -33,8 +42,8 @@ app.layout = html.Div([
         figure={
             'data': [
                 go.Bar(
-                    x=list(state_map.keys()),
-                    y=list(state_map.values()),
+                    x=list(voter_opp_map.keys()),
+                    y=list(voter_opp_map.values()),
                 )
             ],
             'layout': go.Layout(
